@@ -5,6 +5,7 @@ import java.sql.*;
 import javax.sound.midi.ShortMessage;
 
 import com.artico.controller.SMSHelper;
+import com.artico.controller.ValidatorHelper;
 import com.artico.model.Recados;
 import oracle.jdbc.OracleTypes;
 
@@ -42,7 +43,7 @@ public class RecadosManager implements Runnable {
 		dbConnection.setAutoCommit(false);
 		CallableStatement callableStatement = null;
 		ResultSet rs = null;
-
+		ValidatorHelper validator = new ValidatorHelper();
 		String getDBUSERCursorSql = "{call PKG_RECADOS.OBTIENESMSPENDIENTE(?)}";
 
 		try {
@@ -60,12 +61,15 @@ public class RecadosManager implements Runnable {
 				String telefono = rs.getString("TELEFONO");
 				String asunto = rs.getString("ASUNTO");
 				String mensaje = rs.getString("MENSAJE");
+				String smsType = validator.getSMSType(mensaje);
+				int smsQuantity = validator.getSMSQuantity(mensaje, smsType);
+				//int CantidadSMS = validator.
 				sms.enviaSMS(telefono, mensaje);
 				System.out.println("id : " + id);
 				System.out.println("telefono : " + telefono);
 				System.out.println("asunto : " + asunto);
 				System.out.println("mensaje : " + mensaje);
-				cambiaEstadoSMS(id);
+				cambiaEstadoSMS(id,smsQuantity, smsType);
 				Thread.sleep(30000);
 			}
 			Recados.getInstancia().setEstadoProceso('L');
@@ -94,7 +98,7 @@ public class RecadosManager implements Runnable {
 		}
 
 	}
-public static void cambiaEstadoSMS(int idSMS) throws SQLException{
+public static void cambiaEstadoSMS(int idSMS, int cantidadSMS, String tipoSMS) throws SQLException{
 	Connection dbConnection = ConectionHelper.getConnection("env " + 2);
 	dbConnection.setAutoCommit(false);
 	CallableStatement callableStatement = null;
@@ -108,8 +112,8 @@ public static void cambiaEstadoSMS(int idSMS) throws SQLException{
 		
 		callableStatement.setInt(2, idSMS);
 		callableStatement.setInt(3, 1000);
-		callableStatement.setString(4, "GSM");
-		callableStatement.setInt(5, 1);
+		callableStatement.setString(4, tipoSMS);
+		callableStatement.setInt(5, cantidadSMS);
 		callableStatement.setString(6, error);
 		
 

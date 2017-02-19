@@ -25,7 +25,7 @@ import javax.net.ssl.HttpsURLConnection;
  *
  */
 public class SMSHelper {
-	final String RUTA_MODEM = "http://192.168.1.57";
+	final String RUTA_MODEM = "http://192.168.0.11";
 	private String urlModem= RUTA_MODEM +"/default/en_US/sms_info.html";
 	private static String line = "1"; // Esta variable se utiliza para indicar al modem con cual SIM enviara el sms, en caso de que tenga mas de 1
 	final static String USER = "admin"; // Usuario del modem
